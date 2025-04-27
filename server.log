@@ -1,0 +1,12 @@
+2025-04-28 00:00:27.342880 - "GET / HTTP/1.1" 200 -
+2025-04-28 00:00:27.345849 - GET /
+2025-04-28 00:00:27.385856 - "GET /static/styles.css HTTP/1.1" 200 -
+2025-04-28 00:00:27.387859 - GET /static/styles.css
+2025-04-28 00:00:27.604157 - "GET /static/image.png HTTP/1.1" 404 -
+2025-04-28 00:00:27.606160 - GET /static/image.png
+2025-04-28 00:00:27.731814 - "GET /static/script.js HTTP/1.1" 200 -
+2025-04-28 00:00:27.734835 - GET /static/script.js
+2025-04-28 00:00:37.291625 - POST /submit - Form Data Received: {'name': ['Aniqa Azhar']}
+2025-04-28 00:00:37.293641 - "POST /submit HTTP/1.1" 200 -
+2025-04-28 00:01:36.403949 - "GET /image.png HTTP/1.1" 404 -
+2025-04-28 00:01:36.405952 - 404 Not Found: /image.png
