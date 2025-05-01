@@ -5,6 +5,8 @@ import json
 from bs4 import BeautifulSoup
 import requests
 import os
+import base64
+import re
 
 LOG_FILE = "server.log"
 FORM_DATA_FILE = "form_data.txt"
@@ -57,6 +59,28 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
             return
 
         external_url = query['url'][0]
+
+        if external_url.startswith("data:"):
+        # Example: data:image/png;base64,iVBORw0KGgoAAAANS...
+            try:
+                match = re.match(r'data:(.*?);base64,(.*)', external_url)
+                if not match:
+                    raise ValueError("Invalid data URI")
+
+                mime_type, base64_data = match.groups()
+                decoded_data = base64.b64decode(base64_data)
+
+                self.send_response(200)
+                self.send_header('Content-Type', mime_type)
+                self.end_headers()
+                self.wfile.write(decoded_data)
+
+                self.log_message("Served data URI: %s", mime_type)
+            except Exception as e:
+                self.send_error_page(400, f"Invalid data URI: {str(e)}")
+                self.log_message("400 Bad Request - Invalid data URI: %s", str(e))
+            return
+        
         try:
             response = requests.get(external_url, headers={"User-Agent": "Mozilla/5.0"})
             content_type = response.headers.get('Content-Type', 'text/html')
@@ -90,6 +114,9 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         except requests.exceptions.InvalidURL:
             self.send_error_page(400)
             self.log_message("400 Bad Request - Invalid URL: %s", external_url)
+        except requests.exceptions.ConnectionError:
+            self.send_error_page(400)
+            self.log_message("400 Bad Request - Connection error for URL: %s", external_url)
         except Exception as e:
             self.send_error_page(500)
             self.log_message("500 Internal Server Error - %s", str(e))
@@ -153,7 +180,6 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
     def send_error_page(self, code, message=None):
         page_map = {
             400: "templates/400.html",
-            403: "templates/403.html",
             404: "templates/404.html",
             500: "templates/500.html"
         }
