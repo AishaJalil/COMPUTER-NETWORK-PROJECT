@@ -210,14 +210,14 @@ if __name__ == "__main__":
         "-l",
         "--listen",
         default="localhost",
-        help="Specify the address on which the server listens",
+        help="Give the address on which the server should listen",
     )
     parser.add_argument(
         "-p",
         "--port",
         type=int,
         default=8000,
-        help="Specify the port on which the server listens",
+        help="Give the port on which the server should listen",
     )
 
     args = parser.parse_args()
