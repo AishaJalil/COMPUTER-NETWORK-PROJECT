@@ -1,6 +1,7 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import parse_qs, urlparse, urljoin
 from datetime import datetime
+import argparse
 import json
 from bs4 import BeautifulSoup
 import requests
@@ -61,7 +62,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         external_url = query['url'][0]
 
         if external_url.startswith("data:"):
-        # Example: data:image/png;base64,iVBORw0KGgoAAAANS...
+        #example: data:image/png;base64,iVBORw0KGgoAAAANS...
             try:
                 match = re.match(r'data:(.*?);base64,(.*)', external_url)
                 if not match:
@@ -82,7 +83,19 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
             return
         
         try:
-            response = requests.get(external_url, headers={"User-Agent": "Mozilla/5.0"})
+            parsed = urlparse(external_url)
+            if not parsed.scheme or not parsed.netloc or '.' not in parsed.netloc:
+                self.send_error_page(400, f"Malformed URL: {external_url}")
+                self.log_message("400 Bad Request - Malformed URL: %s", external_url)
+                return
+
+            response = requests.get(external_url, headers={"User-Agent": "Mozilla/5.0"}, timeout=5)
+
+            if response.status_code == 404:
+                self.send_error_page(404, f"Page not found: {external_url}")
+                self.log_message("404 Not Found - %s", external_url)
+                return
+            
             content_type = response.headers.get('Content-Type', 'text/html')
 
             if 'text/html' in content_type:
@@ -108,15 +121,10 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
 
             self.log_message("Fetched external URL: %s", external_url)
 
-        except requests.exceptions.MissingSchema:
-            self.send_error_page(400)
-            self.log_message("400 Bad Request - Missing schema in URL: %s", external_url)
-        except requests.exceptions.InvalidURL:
-            self.send_error_page(400)
-            self.log_message("400 Bad Request - Invalid URL: %s", external_url)
+        
         except requests.exceptions.ConnectionError:
-            self.send_error_page(400)
-            self.log_message("400 Bad Request - Connection error for URL: %s", external_url)
+            self.send_error_page(502)
+            self.log_message("502 Bad Gateway - Connection error for URL: %s", external_url)
         except Exception as e:
             self.send_error_page(500)
             self.log_message("500 Internal Server Error - %s", str(e))
@@ -181,7 +189,8 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         page_map = {
             400: "templates/400.html",
             404: "templates/404.html",
-            500: "templates/500.html"
+            500: "templates/500.html",
+            502: "templates/502.html"
         }
 
         file_path = page_map.get(code)
@@ -196,7 +205,23 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    server_address = ('localhost', 8000)
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-l",
+        "--listen",
+        default="localhost",
+        help="Specify the address on which the server listens",
+    )
+    parser.add_argument(
+        "-p",
+        "--port",
+        type=int,
+        default=8000,
+        help="Specify the port on which the server listens",
+    )
+
+    args = parser.parse_args()
+    server_address = (args.listen, args.port)
     httpd = HTTPServer(server_address, SimpleHTTPRequestHandler)
     print(f"Starting HTTP Server at http://{server_address[0]}:{server_address[1]}")
     httpd.serve_forever()
