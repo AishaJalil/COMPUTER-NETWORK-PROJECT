@@ -139,26 +139,39 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
             return
 
         try:
+            name = "unknown"
             if content_type == "application/json":
                 data = json.loads(post_data.decode('utf-8'))
-                message = f"JSON Received: {data}"
+                name = data.get("name", "unknown")
             else:
                 data = parse_qs(post_data.decode('utf-8'))
-                message = f"Form Data Received: {data}"
+                name = data.get("name", ["unknown"])[0]
 
-            self.log_message("POST /submit - %s", message)
+            self.log_message("POST /submit - Name received: %s", name)
 
             with open(FORM_DATA_FILE, "a") as f:
-                f.write(str(data) + "\n")
+                f.write(f"name: {name}\n")
 
             self.send_response(200)
-            self.send_header('Content-Type', 'application/json')
+            self.send_header('Content-Type', 'text/html')
             self.end_headers()
-            response = json.dumps({"status": "success", "received": data})
-            self.wfile.write(response.encode('utf-8'))
+
+            html = f"""
+            <!DOCTYPE html>
+            <html>
+            <head><title>Form Submitted</title></head>
+            <body style="font-family: Arial; text-align: center; margin: 50px;">
+                <h2>Form received with data:</h2>
+                <p><strong>{name}</strong></p>
+                <a href="/">Go back</a>
+            </body>
+            </html>
+            """
+            self.wfile.write(html.encode('utf-8'))
 
         except Exception as e:
             self.send_error_page(400, f"Error parsing POST data: {str(e)}")
+
 
     def serve_file(self, filepath, content_type):
         try:
