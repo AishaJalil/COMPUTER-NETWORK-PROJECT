@@ -1,0 +1,18 @@
+2025-05-04 06:22:27.384063 - "GET / HTTP/1.1" 200 -
+2025-05-04 06:22:27.387096 - GET /
+2025-05-04 06:22:27.419836 - "GET /static/styles.css HTTP/1.1" 200 -
+2025-05-04 06:22:27.427897 - GET /static/styles.css
+2025-05-04 06:22:27.633027 - "GET /static/image.png HTTP/1.1" 200 -
+2025-05-04 06:22:27.633027 - GET /static/image.png
+2025-05-04 06:22:27.741863 - "GET /static/script.js HTTP/1.1" 200 -
+2025-05-04 06:22:27.741863 - GET /static/script.js
+2025-05-04 06:22:32.163110 - POST /submit - Name received: testing
+2025-05-04 06:22:32.163110 - "POST /submit HTTP/1.1" 200 -
+2025-05-04 06:22:36.919592 - "GET / HTTP/1.1" 200 -
+2025-05-04 06:22:36.919592 - GET /
+2025-05-04 06:22:37.040067 - "GET /static/styles.css HTTP/1.1" 200 -
+2025-05-04 06:22:37.040067 - GET /static/styles.css
+2025-05-04 06:22:37.349948 - "GET /static/image.png HTTP/1.1" 200 -
+2025-05-04 06:22:37.349948 - GET /static/image.png
+2025-05-04 06:22:37.349948 - "GET /static/script.js HTTP/1.1" 200 -
+2025-05-04 06:22:37.357908 - GET /static/script.js
